@@ -62,8 +62,6 @@ INSTALLED_APPS = [
 
     "myapp",
     "rest_framework",
-    # "corsheaders",
-    # "rest_framework."
 ]
 
 MIDDLEWARE = [
@@ -180,16 +178,6 @@ AUTHENTICATION_BACKENDS = [
 
 #👇Redis Code Below👇
 
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379/1",  # Change this to your Redis server location
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#         }
-#     }
-# }
-
 # # Optional: Configure session storage to use Redis
 # SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 # SESSION_CACHE_ALIAS = "default"
@@ -205,16 +193,6 @@ CACHES = {
         "KEY_PREFIX":"example"
     }
 }
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379/1",  # Adjust this to your Redis server location
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#         },
-#         "KEY_PREFIX":"example"
-#     }
-# }
 
 CACHE_TTL = 60 * 2
 

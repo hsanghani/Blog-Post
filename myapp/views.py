@@ -1,64 +1,3 @@
-# from rest_framework import generics, status, permissions
-# from rest_framework.response import Response
-# from .models import Employees, Todo
-# from .serializers import TodoSerializer, EmployeeSerializer
-# from rest_framework_simplejwt.authentication import JWTAuthentication
-# from rest_framework.permissions import IsAuthenticated, AllowAny
-# from django.contrib.auth import authenticate
-# from .tokens import create_jwt_pair_for_user
-
-# class EmployeeListCreateView(generics.ListCreateAPIView):
-#     queryset = Employees.objects.all()
-#     serializer_class = EmployeeSerializer
-#     permission_classes = [AllowAny]
-
-#     def create(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         self.perform_create(serializer)
-#         headers = self.get_success_headers(serializer.data)
-#         response = {"message": "Employee Created Successfully", "data": serializer.data}
-#         return Response(response, status=status.HTTP_201_CREATED, headers=headers)
-
-# class EmployeeDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = Employees.objects.all()
-#     serializer_class = EmployeeSerializer
-#     permission_classes = [IsAuthenticated]
-#     lookup_field = 'pk'
-
-# class LoginView(generics.GenericAPIView):
-#     serializer_class = EmployeeSerializer
-#     permission_classes = [AllowAny]
-
-#     def post(self, request, *args, **kwargs):
-#         email = request.data.get("email")
-#         password = request.data.get("password")
-
-#         user = authenticate(email=email, password=password)
-#         if user is not None:
-#             tokens = create_jwt_pair_for_user(user)
-#             response = {"message": "Login Successful", "tokens": tokens}
-#             return Response(data=response, status=status.HTTP_200_OK)
-#         else:
-#             return Response(data={"message": "Invalid email or password"}, status=status.HTTP_400_BAD_REQUEST)
-
-# class TodoListCreateView(generics.ListCreateAPIView):
-#     queryset = Todo.objects.all()
-#     serializer_class = TodoSerializer
-#     permission_classes = [IsAuthenticated]
-#     authentication_classes = [JWTAuthentication]
-
-#     def perform_create(self, serializer):
-#         serializer.save(user=self.request.user)
-
-# class TodoDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = Todo.objects.all()
-#     serializer_class = TodoSerializer
-#     permission_classes = [IsAuthenticated]
-#     authentication_classes = [JWTAuthentication]
-#     lookup_field = 'pk'
-
-
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from .models import Employees, Todo
@@ -71,7 +10,6 @@ from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
-import time
 
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
@@ -95,7 +33,6 @@ class EmployeeListCreateView(generics.ListCreateAPIView):
             print("cache employee")
             return Response(employees)
 
-
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         cache.delete('employee_list')
@@ -109,10 +46,6 @@ class EmployeeListCreateView(generics.ListCreateAPIView):
         # return Response(response, status=status.HTTP_201_CREATED, headers=headers)
 
 class EmployeeDetailView(generics.RetrieveUpdateDestroyAPIView):
-    # queryset = Employees.objects.all()
-    # serializer_class = EmployeeSerializer
-    # permission_classes = [IsAuthenticated]
-    # lookup_field = 'pk'
 
     queryset = Employees.objects.all()
     serializer_class = EmployeeSerializer
@@ -128,23 +61,6 @@ class EmployeeDetailView(generics.RetrieveUpdateDestroyAPIView):
         response = super().destroy(request, *args, **kwargs)
         cache.delete('employee_list')
         return response
-
-# class LoginView(generics.GenericAPIView):
-#     serializer_class = EmployeeSerializer
-#     permission_classes = [AllowAny]
-#     authentication_classes = []  
-
-#     def post(self, request, *args, **kwargs):
-#         email = request.data.get("email")
-#         password = request.data.get("password")
-
-#         user = authenticate(email=email, password=password)
-#         if user is not None:
-#             tokens = create_jwt_pair_for_user(user)
-#             response = {"message": "Login Successful", "tokens": tokens}
-#             return Response(data=response, status=status.HTTP_200_OK)
-#         else:
-#             return Response(data={"message": "Invalid email or password"}, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(generics.GenericAPIView):
     serializer_class = EmployeeSerializer
@@ -172,73 +88,6 @@ class LoginView(generics.GenericAPIView):
             return Response(data=response, status=status.HTTP_200_OK)
         else:
             return Response(data={"message": "Invalid email or password"}, status=status.HTTP_400_BAD_REQUEST)
-
-# class LoginView(generics.GenericAPIView):
-#     serializer_class = EmployeeSerializer
-#     permission_classes = [AllowAny]
-
-#     def post(self, request, *args, **kwargs):
-#         email = request.data.get("email")
-#         password = request.data.get("password")
-
-#         cache_key = f"user_tokens_{email}"
-#         cached_tokens = cache.get(cache_key)
-
-#         if cached_tokens:
-#             # Assuming the cached tokens include an expiration timestamp
-#             token_expiration = cached_tokens.get("expires_at")
-#             print(token_expiration)
-#             print(time.time())
-#             if token_expiration and token_expiration > time.time():
-#                 # Token is valid
-#                 response = {"message": "Login Successful", "tokens": cached_tokens}
-#                 return Response(data=response, status=status.HTTP_200_OK)
-#             else:
-#                 # Token has expired, generate a new one
-#                 print("email ::>",email)
-#                 tokens = self._generate_and_cache_tokens(email,password)
-#                 response = {"message": "Token expired, new token generated", "tokens": tokens}
-#                 return Response(data=response, status=status.HTTP_200_OK)
-
-#         # If no cached tokens, authenticate and generate new tokens
-#         user = authenticate(email=email, password=password)
-#         if user is not None:
-#             print("email :::::>>>>>",email)
-#             tokens = self._generate_and_cache_tokens(email,password)
-#             response = {"message": "Login Successful", "tokens": tokens}
-#             return Response(data=response, status=status.HTTP_200_OK)
-#         else:
-#             return Response(data={"message": "Invalid email or password"}, status=status.HTTP_400_BAD_REQUEST)
-
-#     def _generate_and_cache_tokens(self, email,password):
-#         # Create new tokens
-#         user = authenticate(email=email,password=password)  # Assuming user is authenticated here
-#         print("user check :::>>",user)
-#         tokens = create_jwt_pair_for_user(user)
-#         # Add expiration timestamp to tokens
-#         tokens["expires_at"] = time.time() + CACHE_TTL
-#         # Cache the tokens with TTL
-#         cache.set(f"user_tokens_{email}", tokens, timeout=CACHE_TTL)
-#         return tokens
-
-
-# class TodoListCreateView(generics.ListCreateAPIView):
-#     queryset = Todo.objects.all()
-#     serializer_class = TodoSerializer
-#     permission_classes = [IsAuthenticated]
-#     authentication_classes = [JWTAuthentication]
-
-#     def perform_create(self, serializer):
-#         serializer.save(user=self.request.user)
-
-# class TodoDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = Todo.objects.all()
-#     serializer_class = TodoSerializer
-#     permission_classes = [IsAuthenticated]
-#     authentication_classes = [JWTAuthentication]
-#     lookup_field = 'pk'
-
-
 
 class TodoListCreateView(generics.ListCreateAPIView):
     queryset = Todo.objects.all()
